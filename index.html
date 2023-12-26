@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive.org WayBack Machine YouTube Downloader</title>
+    <style>
+        body {
+            --primary:#bb1614;
+            --on-primary:#ffffff;
+            --primary-container:#ffdad5;
+            --on-primary-container:#410001;
+            --secondary:#775652;
+            --on-secondary:#ffffff;
+            --secondary-container:#ffdad5;
+            --on-secondary-container:#2c1512;
+            --tertiary:#705c2e;
+            --on-tertiary:#ffffff;
+            --tertiary-container:#fcdfa6;
+            --on-tertiary-container:#261a00;
+            --error:#ba1a1a;
+            --on-error:#ffffff;
+            --error-container:#ffdad6;
+            --on-error-container:#410002;
+            --background:#fffbff;
+            --on-background:#201a19;
+            --surface:#fff8f7;
+            --on-surface:#201a19;
+            --surface-variant:#f5ddda;
+            --on-surface-variant:#534341;
+            --outline:#857370;
+            --outline-variant:#d8c2be;
+            --shadow:#000000;
+            --scrim:#000000;
+            --inverse-surface:#362f2e;
+            --inverse-on-surface:#fbeeec;
+            --inverse-primary:#ffb4a9;
+            --surface-dim:#e4d7d5;
+            --surface-bright:#fff8f7;
+            --surface-container-lowest:#ffffff;
+            --surface-container-low:#fef1ef;
+            --surface-container:#f8ebe9;
+            --surface-container-high:#f3e5e3;
+            --surface-container-highest:#ede0de;
+        }
+
+        iframe
+        {
+            border: 1px solid black;
+            border-radius: 20px;
+            margin-top: 20px;
+            height: 450px;
+            width: 70%;
+        }
+
+        progress
+        {
+            width: 70% !important;
+            margin-top: 20px;
+        }
+
+        #youtubeForm
+        {
+            margin-top: 30px;
+            margin-left: 20%;
+            margin-right: 20%;
+        }
+
+        #archiveLinkContainer
+        {
+            margin-top: 20px;
+        }
+
+        .titletext
+        {
+            margin-top: 20px;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: underline !important;
+        }
+
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.4.10/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.4.10/dist/cdn/beer.min.js"></script>
+</head>
+<body>
+    <h3 class="max center-align titletext">WayBack Machine YouTube Downloader</h3>
+
+
+    <form id="youtubeForm">
+
+        <nav class="no-space center-align">
+            <div class="max field label border left-round">
+              <input type="text" id="youtubeLink" name="youtubeLink" required>
+              <label>Enter YouTube URL</label>
+            </div>
+            <button type="button" class="large right-round" onclick="loadArchivePage()">
+                <i>Download</i>
+                <span>Download</span>
+            </button>
+        </nav>
+
+    </form>
+
+    <div id="archiveFrameContainer" class="center-align">
+    </div>
+
+    <div id="archiveLinkContainer" class="center-align">
+        <p>To save the video, right click on the video and select "Save Video As... or click on the three dots on the bottom right of the video and select "Download" (Chromium browsers only).</p>
+        <b>If no video is shown, the video is not available in the Archive.org WayBack Machine.</b>
+        <br><br><a>View on GitHub</a>
+    </div>
+
+    <script>
+        function loadArchivePage() {
+            var youtubeLink = document.getElementById('youtubeLink').value;
+
+
+            // Extract video ID from YouTube link
+            var videoId = extractVideoId(youtubeLink);
+
+            if (videoId) {
+                // Create a progress element
+                var progress = document.createElement('progress');
+
+                // Create an iframe element
+                var iframe = document.createElement('iframe');
+
+                // Set iframe attributes
+                iframe.src = 'https://web.archive.org/web/2oe_/http://wayback-fakeurl.archive.org/yt/' + videoId;
+                iframe.width = '100%';
+                iframe.height = '100%';
+
+                // Clear previous iframe, if any
+                var container = document.getElementById('archiveFrameContainer');
+                container.innerHTML = '';
+
+                // Append the progress bar to the container
+                container.appendChild(progress);
+                // Append the iframe to the container
+                container.appendChild(iframe);
+
+                // Remove the progress bar when the iframe is loaded
+                iframe.onload = function() {
+                    container.removeChild(progress);
+                };
+
+
+            }
+        }
+
+        function extractVideoId(youtubeLink) {
+            // Regex to extract video ID from YouTube link
+            var regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+            var match = youtubeLink.match(regex);
+            if (match && match[1]) {
+                return match[1];
+            } else {
+                // create dialog
+                var dialog = document.createElement('dialog');
+                dialog.class = 'modal';
+                dialog.innerHTML = '<h5>Invalid YouTube URL</h5><div>Please enter a valid link.</div><nav class="right-align no-space"><button class="transparent link">OK</button></nav>';
+                //append dialog to body
+                document.body.appendChild(dialog);
+                // blur background
+                document.body.style.filter = 'blur(5px) grayscale(100%)';
+
+                //show dialog
+                dialog.showModal();
+                //close dialog when button is clicked
+                dialog.querySelector('button').addEventListener('click', function() {
+                    dialog.close();
+                    document.body.style.filter = 'blur(0px) grayscale(0%)';
+                });
+
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>
